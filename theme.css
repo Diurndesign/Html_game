@@ -1,0 +1,12 @@
+/* Mission Tago (HTML) : le sable de la crique, Tago en orange, l’action en bleu mer. */
+:root {
+  --bg: #F4EEE4;
+  --grid: rgba(27, 36, 64, 0.055);
+  --mascot: #FF8A3D;
+  --mascot-deep: #E8590C;
+  --mascot-soft: #FFEBDA;
+  --mascot-ink: #1B2440;
+  --action: #2F6BFF;
+  --action-soft: #E6EEFF;
+  --action-ink: #FFFFFF;
+}
