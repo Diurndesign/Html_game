@@ -630,6 +630,11 @@ function showDiscover() {
     <div class="uses">${D.uses.map(u => `<article class="card use"><h3>${esc(u.title)}</h3><p>${md(u.text)}</p></article>`).join("")}</div>
   </section>
 
+  ${D.jobs ? `<section class="disc-block">
+    <div class="section-title"><h2>${esc(D.jobs.title)}</h2><p>${md(D.jobs.text || "")}</p></div>
+    <div class="uses jobs">${D.jobs.items.map(u => `<article class="card use job"><p class="card-kicker">Métier</p><h3>${esc(u.title)}</h3><p>${md(u.text)}</p></article>`).join("")}</div>
+  </section>` : ""}
+
   <section class="disc-block disc-two">
     <article class="card"><p class="card-kicker">Le vocabulaire</p><dl class="glossary">${D.words.map(([k, d]) => `<div><dt>${md(k)}</dt><dd>${md(d)}</dd></div>`).join("")}</dl></article>
     <article class="card"><p class="card-kicker">Les pièges du débutant</p><ul class="traps">${D.traps.map(t => `<li>${md(t)}</li>`).join("")}</ul>

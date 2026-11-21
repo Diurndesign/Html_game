@@ -14,8 +14,8 @@ const GAME = {
   id: "mission-tago",
   name: "Mission Tago",
   title: ["Mission", "Tago"],
-  kicker: "HTML pour débutants",
-  lead: "Tago est un bernard-l’ermite qui n’a pas de maison. Ses pinces ont la forme de chevrons `<` `>`, comme les balises HTML. Écris du vrai HTML, regarde la page se construire en direct, et chaque atelier terminé ajoute une pièce à la maison de Tago.",
+  kicker: "HTML · pour bien démarrer dans le web",
+  lead: "Tago est un bernard-l’ermite qui n’a pas de maison. Ses pinces ont la forme de chevrons `<` `>`, comme les balises HTML. Écris du vrai HTML, regarde la page se construire en direct, et chaque atelier terminé ajoute une pièce à la maison de Tago. Aucune connaissance n’est nécessaire : on part de zéro.",
   mode: "html",
   lang: "html",
   rewardWord: "pièces de la maison",
@@ -43,7 +43,7 @@ const GAME = {
     cardText: "5 minutes pour comprendre avant de jouer, avec une démo à tester.",
     kicker: "Étape 0 · Découvrir",
     title: "C’est quoi, le **HTML** ?",
-    lead: "Avant d’écrire ta première balise, prends cinq minutes pour comprendre ce qu’est le HTML, à quoi il sert, et pourquoi tous les sites du monde l’utilisent.",
+    lead: "Tu veux te lancer dans une formation web ? Tout commence ici. Avant d’écrire ta première balise, prends cinq minutes pour comprendre ce qu’est le HTML, à quoi il sert, et pourquoi tous les sites du monde l’utilisent.",
     say: "Le HTML, c’est la langue de mes pinces : `<` et `>` ! Je t’explique tout.",
     cards: [
       { title: "C’est quoi ?", text: ["HTML veut dire *HyperText Markup Language*, en français « langage de balisage hypertexte ». C’est le langage qui décrit **le contenu** d’une page web.", "Ce n’est pas un langage de programmation : il ne calcule rien et ne prend aucune décision. Il **étiquette** le contenu : « ceci est un titre », « ceci est une image », « ceci est un lien »."] },
@@ -82,6 +82,16 @@ const GAME = {
       { title: "Dans des applis", text: "Beaucoup d’applis (Discord, VS Code, Spotify sur ordinateur…) affichent leurs écrans avec du HTML." },
       { title: "Pour Google", text: "Les moteurs de recherche lisent le HTML pour comprendre de quoi parle une page et la classer." }
     ],
+    jobs: {
+      title: "Et dans les métiers du web ?",
+      text: "Le HTML est la toute première chose qu’on apprend en formation, et on l’utilise tous les jours ensuite.",
+      items: [
+        { title: "Intégrateur·rice web", text: "Transforme les maquettes des designers en vraies pages : son premier travail est d’écrire un HTML propre et bien structuré." },
+        { title: "Développeur·se front-end", text: "Construit les interfaces des sites et des applis. Même avec des outils modernes (React, Vue…), on écrit toujours du HTML." },
+        { title: "Webdesigner / UI designer", text: "Dessine les pages. Connaître le HTML permet de proposer des maquettes réalisables et de parler le même langage que les développeurs." },
+        { title: "Chargé·e de référencement (SEO)", text: "Vérifie que les titres, les `alt` et la structure du HTML aident Google à bien comprendre et bien classer les pages." }
+      ]
+    },
     words: [
       ["**Balise**", "un mot entre chevrons, comme `<p>`. Elle va souvent par deux : une ouvrante et une fermante."],
       ["**Élément**", "la balise ouvrante, le contenu et la balise fermante, ensemble."],
