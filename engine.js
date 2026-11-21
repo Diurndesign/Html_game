@@ -180,6 +180,13 @@ function lintHTML(src) {
     }
     if (name === "a" && !("href" in seen)) add("warn", line, "Ce lien `<a>` n’a pas d’attribut `href` : il ne mène nulle part.");
     if (name === "label" && !("for" in seen)) add("tip", line, "Un `<label>` se relie à son champ avec `for=\"…\"`, qui reprend l’`id` du champ.");
+    const top = stack[stack.length - 1];
+    if (top && top.name === name && /^(p|h[1-6]|li|a|strong|em|title|button|label|span|td|th)$/.test(name)) {
+      // <p>Bonjour<p> : la barre / a sûrement été oubliée
+      add("error", line, `Une nouvelle balise \`<${name}>\` s’ouvre alors que celle de la ligne ${top.line} n’est pas fermée. Tu voulais sûrement écrire \`</${name}>\`, avec une barre \`/\`.`);
+      stack.pop();
+      continue;
+    }
     if (!VOID_TAGS.has(name) && m[4] !== "/") stack.push({ name, line });
     if (name === "script" || name === "style") {
       const end = src.toLowerCase().indexOf(`</${name}`, i);
