@@ -1,6 +1,6 @@
 # Mission Tago · Html_game
 
-Un jeu pour apprendre les bases du HTML en écrivant du vrai code.
+Un jeu pour apprendre les bases du HTML en écrivant du vrai code, pensé pour les personnes qui veulent **commencer une formation dans le web** : aucune connaissance n’est nécessaire.
 
 Tago est un bernard-l’ermite qui n’a pas de maison. Ses pinces ont la forme de chevrons `<` `>`, comme les balises HTML. Chaque mission réussie construit sa page web, et chaque atelier terminé ajoute une pièce à sa maison (les fondations, les murs, la fenêtre…).
 
