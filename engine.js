@@ -1179,6 +1179,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#brand-name").textContent = GAME.name;
   $("#nav-discover").textContent = GAME.discover.nav;
   $("#footer-text").textContent = `${GAME.name} · un jeu pour apprendre ${GAME.discover.subject}`;
+  $$(".serie a").forEach(a => { if (!a.classList.contains("btn") && location.pathname.toLowerCase().startsWith(new URL(a.href).pathname.toLowerCase())) a.setAttribute("aria-current", "page"); });
   $("#brand").addEventListener("click", showMap);
   $("#nav-map").addEventListener("click", showMap);
   $("#nav-discover").addEventListener("click", showDiscover);

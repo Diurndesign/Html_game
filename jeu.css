@@ -516,3 +516,7 @@ a.trio-item[href]:hover { border-color: var(--ink); }
 
 /* Le code dans les textes peut aller à la ligne (sinon il déborde des cartes) */
 .steps code, .hint-list code, .goal code, .bubble code, .lesson p code, .pieces dd code, .trap code, .good code, .why code, .q-why code, .lexicon code, .checklist code, .lint-item code { white-space: normal; overflow-wrap: anywhere; }
+
+/* Pied de page : la série de jeux et le site Atelier */
+.pied-jeu-in .serie a[aria-current] { text-decoration: none; background: var(--mascot); color: var(--mascot-ink, var(--ink)); border-radius: 6px; padding: 0 6px; }
+.pied-jeu-in .serie .atelier { border-left: 2px solid var(--ink-soft); padding-left: 14px; }
