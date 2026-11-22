@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="style.css?v=20261122">
+<link rel="stylesheet" href="theme.css?v=20261122">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -35,14 +35,20 @@
   <a href="https://diurndesign.github.io/Flexbox-game/">Flexbox</a>
   <a href="https://diurndesign.github.io/Grid-game/">Grid</a>
   <a href="https://diurndesign.github.io/javascript_game/">JavaScript</a>
+  <a class="btn btn-small" href="https://diurndesign.github.io/javascript_game/admin.html" target="_blank" rel="noopener">Espace formateur</a>
 </nav></div></footer>
 
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="dialog" id="dialog"></div></div>
 <canvas id="confetti" hidden></canvas>
 <noscript><p style="padding:24px">Ce jeu a besoin de JavaScript pour fonctionner.</p></noscript>
 
-<script src="mascot.js" defer></script>
-<script src="engine.js" defer></script>
-<script src="game.js" defer></script>
+<!-- sauvegarde en ligne : Firebase, le même projet et le même compte que Mission Bip -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
+<script src="cloud.js?v=20261122" defer></script>
+<script src="mascot.js?v=20261122" defer></script>
+<script src="engine.js?v=20261122" defer></script>
+<script src="game.js?v=20261122" defer></script>
 </body>
 </html>

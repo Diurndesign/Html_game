@@ -9,7 +9,7 @@ Tago est un bernard-l’ermite qui n’a pas de maison. Ses pinces ont la forme 
 - **En ligne** : active GitHub Pages (Settings › Pages › *Deploy from a branch*, choisis la branche du jeu et le dossier `/ (root)`). Le jeu sera disponible à l’adresse `https://diurndesign.github.io/Html_game/`.
 - **En local** : ouvre le dossier avec l’extension Live Server de VS Code (ou n’importe quel petit serveur web). Ouvrir `index.html` directement en double-cliquant peut bloquer l’aperçu dans certains navigateurs.
 
-La progression est enregistrée dans le navigateur de chaque joueur (localStorage).
+La progression est enregistrée dans le navigateur, et en ligne si l’élève crée un compte (voir « La sauvegarde en ligne »).
 
 ## Comment ça marche
 
@@ -45,12 +45,40 @@ index.html   la structure de la page
 style.css    le design commun aux 4 jeux
 theme.css    les couleurs de ce jeu (variables CSS dans :root)
 engine.js    le moteur commun : éditeur, aperçu, vérificateur, objectifs, carte, carnet
+cloud.js     la sauvegarde en ligne (Firebase), reprise de Mission Bip
 mascot.js    Tago, en SVG
 game.js      les données du jeu : page Découvrir, ateliers et missions (tableau levels)
 img/         les images utilisées dans les missions
 ```
 
 Pour ajouter ou modifier une mission, édite le tableau `levels` dans `game.js`. Chaque mission contient : le texte de Tago, la leçon (quoi, pourquoi, code, morceaux, exemple, piège), les étapes, le code de départ, les objectifs (`goals`, avec une fonction `test`), les indices et la solution.
+
+## La sauvegarde en ligne
+
+Comme dans Mission Bip : sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans Firebase (projet « bip-jeux », le même que Mission Bip) et l’élève la retrouve sur n’importe quel ordinateur. **Le même compte sert pour tous les jeux** : Mission Tago, Mission Kami, Kami et les lucioles, Le potager de Kami, Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
+
+Ce qui est enregistré pour le formateur, mission par mission : essais, essais ratés, erreurs du vérificateur, indices, solution vue, réponses fausses aux quiz, étoiles et temps passé (même format que Mission Bip).
+
+Rappel aux élèves : noter son e-mail et son mot de passe, et se déconnecter en partant d’un ordinateur de l’école.
+
+### À faire une fois dans Firebase (formateur)
+
+Les règles Firestore du projet « bip-jeux » n’autorisent pour l’instant que `mission-bip` et `bip-agence`. Dans **console.firebase.google.com › bip-jeux › Firestore Database › Règles**, remplace la liste des jeux par :
+
+```
+&& jeu in ['mission-bip', 'bip-agence', 'mission-tago', 'mission-kami', 'kami-lucioles', 'kami-potager'];
+```
+
+puis clique sur **Publier**. Sans cette étape, le jeu marche quand même, mais la sauvegarde en ligne affiche « La base refuse l’accès ».
+
+| Jeu | Nom du document dans Firestore |
+|---|---|
+| Mission Tago (HTML) | `eleves/{uid}/jeux/mission-tago` |
+| Mission Kami (CSS) | `eleves/{uid}/jeux/mission-kami` |
+| Kami et les lucioles (Flexbox) | `eleves/{uid}/jeux/kami-lucioles` |
+| Le potager de Kami (Grid) | `eleves/{uid}/jeux/kami-potager` |
+
+L’**Espace formateur** (bouton en bas de page) est celui de Mission Bip : `https://diurndesign.github.io/javascript_game/admin.html`.
 
 ## La série
 

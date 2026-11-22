@@ -29,7 +29,9 @@ function initStore() {
   try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) { s = null; }
   store = Object.assign({ progress: {}, drafts: {}, unlockAll: false, seenDiscover: false }, s || {});
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* stockage indisponible : on continue sans */ } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* stockage indisponible : on continue sans */ } if (window.BipCloud) BipCloud.queue(); }
+/* suivi pour l’espace formateur (essais, erreurs, indices, solutions, temps) : voir cloud.js */
+const trk = (kind, id, extra) => { if (window.BipCloud && id) BipCloud.track(kind, id, extra); };
 
 const levelIndex = id => LEVELS.findIndex(l => l.id === id);
 const isDone = id => !!store.progress[id];
@@ -532,6 +534,7 @@ function showMap() {
       <ul class="parts">${CHAPTERS.map(c => `<li class="${done.has(c.n) ? "got" : ""}">${done.has(c.n) ? "✓ " : ""}${esc(c.piece)}</li>`).join("")}</ul>
     </div>
   </section>
+  ${window.BipCloud ? BipCloud.bannerHTML() : ""}
   ${allDone && GAME.next ? `<section class="suite-block">
     <div><p class="kicker">La suite</p><h2>${esc(GAME.next.title)}</h2><p>${md(GAME.next.text)}</p></div>
     <div><a class="btn btn-primary" href="${GAME.next.url}">Continuer dans ${esc(GAME.next.name)} →</a></div>
@@ -676,6 +679,7 @@ function openLevel(id) {
   if (!L) return showMap();
   current = L; preview = null;
   session = { hints: 0, solution: false, attempts: 0, answers: {}, errLine: null };
+  if (!L.sandbox) trk("open", L.id);
   setHash(L.sandbox ? "bac-a-sable" : "mission-" + L.id);
   const i = levelIndex(L.id);
   const ch = CHAPTERS.find(c => c.n === L.ch);
@@ -895,6 +899,8 @@ async function runCode() {
   $("#run").disabled = false;
   renderGoals(results);
   const all = results.every(r => r.ok);
+  const firstErr = issues.find(x => x.level === "error");
+  trk("run", L.id, { error: firstErr ? "Ligne " + firstErr.line + " : " + firstErr.msg.replace(/`/g, "") : null, ok: all, goals: [results.filter(r => r.ok).length, results.length] });
   if (all) { setMood("happy"); setTimeout(() => success(L), 300); }
   else { selectTab(issues.some(x => x.level === "error") && !results[0].ok ? "lint" : "goals"); setMood("think"); }
 }
@@ -915,7 +921,7 @@ function renderGoals(results) {
 /* ---------- Indices et solution ---------- */
 function showHint() {
   const L = current; if (session.hints >= L.hints.length) return;
-  session.hints++;
+  session.hints++; trk("hint", L.id);
   $("#help").hidden = false;
   $("#hint-list").innerHTML = L.hints.slice(0, session.hints).map(h => `<li>${md(h)}</li>`).join("");
   const left = L.hints.length - session.hints;
@@ -961,7 +967,7 @@ function bindQuiz(L) {
       const why = $(`#q-${qi} .q-why`); why.hidden = false; why.innerHTML = (ok ? "<strong>Juste.</strong> " : "<strong>Pas tout à fait.</strong> ") + md(qq.why);
     });
     if (good === L.questions.length) { msg.textContent = "Tout est juste !"; setMood("happy"); setTimeout(() => success(L), 400); }
-    else { msg.textContent = `${good} / ${L.questions.length} bonnes réponses. Lis les explications et corrige.`; setMood("think"); }
+    else { trk("wrong", L.id); msg.textContent = `${good} / ${L.questions.length} bonnes réponses. Lis les explications et corrige.`; setMood("think"); }
   });
 }
 
@@ -975,6 +981,7 @@ function success(L) {
   const before = store.progress[L.id];
   const chapterBefore = chapterDone(L.ch);
   store.progress[L.id] = { stars: Math.max(before ? before.stars : 0, stars) };
+  trk("done", L.id, { stars });
   save(); updateStats();
   const newPiece = !chapterBefore && chapterDone(L.ch);
   const allDone = LEVELS.every(l => isDone(l.id));
@@ -1058,7 +1065,7 @@ document.addEventListener("click", e => {
   switch (t.id) {
     case "run": runCode(); break;
     case "hint": showHint(); break;
-    case "show-solution": twoStep(t, "Sûr ? (1 étoile)", () => { session.solution = true; $("#help").hidden = false; $("#solution-box").hidden = false; $("#solution-box").scrollIntoView({ block: "nearest", behavior: "smooth" }); }); break;
+    case "show-solution": twoStep(t, "Sûr ? (1 étoile)", () => { session.solution = true; trk("solution", current.id); $("#help").hidden = false; $("#solution-box").hidden = false; $("#solution-box").scrollIntoView({ block: "nearest", behavior: "smooth" }); }); break;
     case "copy-solution": { const ta = $("#code"); ta.value = current.solution; ta.dispatchEvent(new Event("input")); ta.focus(); break; }
     case "reset": twoStep(t, "Sûr ? Clique encore", () => { const ta = $("#code"); ta.value = current.starter; delete store.drafts[current.id]; save(); ta.dispatchEvent(new Event("input")); }); break;
   }
@@ -1080,4 +1087,13 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#modal").hidden = true; });
   window.addEventListener("resize", () => { fitFrames(); });
   route();
+  /* sauvegarde en ligne (cloud.js, même compte que Mission Bip) */
+  if (window.BipCloud) BipCloud.init({
+    game: GAME.id,
+    getStore: () => store,
+    setStore: s => { store = s; },
+    empty: () => ({ progress: {}, drafts: {}, unlockAll: false, seenDiscover: false }),
+    persist: () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* rien */ } },
+    refresh: () => { updateStats(); if (!current) route(); }
+  });
 });
