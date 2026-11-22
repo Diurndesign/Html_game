@@ -12,10 +12,13 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
 /* Mini markdown : `code`, **gras**, *italique* */
 function md(s) {
-  return String(s || "").split(/(`[^`]*`)/).map(part => {
-    if (part.startsWith("`") && part.endsWith("`") && part.length > 1) return `<code>${esc(part.slice(1, -1))}</code>`;
-    return esc(part).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/(^|[^\w*])\*(?!\s)([^*]+?)\*(?![\w*])/g, "$1<em>$2</em>");
-  }).join("");
+  const codes = [];
+  // on met le code de côté, on applique **gras** et *italique*, puis on remet le code
+  const t = String(s || "").replace(/`([^`]*)`/g, (all, c) => { codes.push(c); return "\u0000" + (codes.length - 1) + "\u0000"; });
+  return esc(t)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^\w*])\*(?!\s)([^*]+?)\*(?![\w*])/g, "$1<em>$2</em>")
+    .replace(/\u0000(\d+)\u0000/g, (all, n) => `<code>${esc(codes[+n])}</code>`);
 }
 
 /* =====================================================================
@@ -72,6 +75,7 @@ function hlHTML(src) {
 }
 function hlCSS(src) {
   let out = "", i = 0, buf = "", mode = "sel"; // sel | prop | val
+  if (!/[{}]/.test(src) && /^\s*(--)?[a-z-]+\s*:[^:]/i.test(src.replace(/\/\*[\s\S]*?\*\//g, ""))) mode = "prop"; // ex. « color: red; » tout seul
   const stack = []; // "at" (bloc @media qui contient des règles) ou "rule"
   const flush = () => {
     if (!buf) return;
@@ -233,6 +237,7 @@ function parseCSS(src) {
           if (/:\s*[^;]+;?/.test(sel) && !/[{}]/.test(sel)) add("error", selLine, `Cette ligne ressemble à une déclaration (\`${sel.split("\n")[0].trim()}\`) mais elle n’est dans aucune règle. Elle doit être entre les accolades \`{ }\` d’un sélecteur.`);
           else add("error", selLine, `Le sélecteur \`${sel.split("\n")[0].trim()}\` n’a pas d’accolade ouvrante \`{\`.`);
         }
+        if (media) add("error", lineAt(clean, clean.length), `Le bloc \`${media}\` n’est jamais fermé : il manque une accolade \`}\` à la fin.`);
         return;
       }
       if (clean[i] === "}") {
@@ -347,9 +352,13 @@ const txt = (c, sel) => { const e = q(c, sel); return e ? e.textContent.replace(
 /* cs(c, sel, prop) : valeur calculée par le navigateur */
 const cs = (c, sel, prop) => { const e = typeof sel === "string" ? q(c, sel) : sel; return e ? c.doc.defaultView.getComputedStyle(e).getPropertyValue(prop).trim() : ""; };
 /* decl(c, sel, prop) : valeur écrite par l’élève pour ce sélecteur (la dernière gagne) */
-function decl(c, sel, prop) {
+/* hors des @media, sauf si on passe media (ex. "@media (max-width: 600px)", ou true pour n’importe laquelle) */
+function decl(c, sel, prop, media) {
   let v = null; const want = norm(sel);
-  (c.rules || []).forEach(r => { if (r.sel && r.sel.split(",").map(norm).includes(want)) r.decls.forEach(d => { if (d.prop === prop) v = d.value; }); });
+  (c.rules || []).forEach(r => {
+    const okMedia = media == null ? !r.media : media === true ? !!r.media : norm(r.media) === norm(media);
+    if (okMedia && r.sel && r.sel.split(",").map(norm).includes(want)) r.decls.forEach(d => { if (d.prop === prop) v = d.value; });
+  });
   return v;
 }
 /* declAny(c, prop) : l’élève a-t-il utilisé cette propriété quelque part ? */
@@ -371,7 +380,8 @@ const killStyleEnd = s => String(s).replace(/<\/style/gi, "<\\/style");
 
 function pageDoc(L, code) {
   const mode = L.mode || GAME.mode;
-  if (mode === "html") return code;
+  // les <script> de l’élève restent dans la page (les tests les voient) mais ne s’exécutent pas dans l’aperçu
+  if (mode === "html") return code.replace(/<script\b(?![^>]*\btype\s*=)/gi, '<script type="text/plain"');
   const html = L.html != null ? L.html : (GAME.pageHTML || "");
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>${PAGE_BASE}${L.base || ""}</style><style id="user-css">${killStyleEnd(code)}</style></head><body>${html}</body></html>`;
 }
@@ -418,6 +428,7 @@ async function renderPreview(code, first) {
         if (!reduce && (Math.abs(dx) > 1 || Math.abs(dy) > 1) && e.animate) e.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: 380, easing: "cubic-bezier(.3, 1.3, .5, 1)" });
       });
     }
+    fitDevices();
     setTimeout(updateBoardStatus, 420);
     return;
   }
@@ -438,6 +449,25 @@ async function renderPreview(code, first) {
   }
   fitFrames();
 }
+/* Missions responsive (devices: true) : en mode « Ordinateur », la page est toujours
+   rendue sur au moins 800 px, même si la colonne est plus étroite, puis réduite à l’écran.
+   Les media queries voient donc bien un écran d’ordinateur. */
+const PC_MIN = 800;
+function fitDevices() {
+  if (!current || !current.devices) return;
+  const phone = !!$(".workbench .phone");
+  $$(".workbench .board iframe").forEach(f => {
+    const box = f.parentElement, w = box.clientWidth, h = box.clientHeight;
+    if (!phone && w && w < PC_MIN) { const sc = w / PC_MIN; Object.assign(f.style, { width: PC_MIN + "px", height: (h / sc) + "px", transformOrigin: "0 0", transform: `scale(${sc})` }); }
+    else Object.assign(f.style, { width: "", height: "", transform: "" });
+  });
+  ["#frame-page", "#frame-model"].forEach(sel => {
+    const f = $(sel); if (!f || f.hidden) return;
+    const w = f.parentElement.clientWidth, h = parseFloat(f.style.height) || f.clientHeight;
+    if (!phone && w && w < PC_MIN) { const sc = w / PC_MIN; Object.assign(f.style, { width: PC_MIN + "px", transformOrigin: "0 0", transform: `scale(${sc})`, marginBottom: (-(h - h * sc)) + "px" }); }
+    else Object.assign(f.style, { width: "", transform: "", marginBottom: "" });
+  });
+}
 function fitFrames() {
   // la hauteur de l’aperçu suit le contenu (entre 220 et 560 px)
   ["#frame-page", "#frame-model"].forEach(s => {
@@ -446,6 +476,7 @@ function fitFrames() {
     const h = f.contentDocument.documentElement.scrollHeight;
     f.style.height = Math.max(220, Math.min(560, h + 4)) + "px";
   });
+  fitDevices();
 }
 
 /* Plateau : chaque élément du jeu est-il sur sa cible ? */
@@ -475,11 +506,11 @@ function updateBoardStatus() {
 /* =====================================================================
    NAVIGATION
    ===================================================================== */
-const VIEWS = ["map", "level", "notebook", "discover"];
+const VIEWS = ["map", "level", "notebook", "discover", "lexique"];
 function setView(name) {
   VIEWS.forEach(v => { $("#view-" + v).hidden = v !== name; });
-  const nav = { map: "nav-map", notebook: "nav-notebook", discover: "nav-discover" };
-  ["nav-map", "nav-notebook", "nav-discover", "nav-sandbox"].forEach(id => $("#" + id).removeAttribute("aria-current"));
+  const nav = { map: "nav-map", notebook: "nav-notebook", discover: "nav-discover", lexique: "nav-lexique" };
+  ["nav-map", "nav-notebook", "nav-discover", "nav-sandbox", "nav-lexique"].forEach(id => $("#" + id).removeAttribute("aria-current"));
   if (nav[name]) $("#" + nav[name]).setAttribute("aria-current", "page");
   if (name === "level" && current && current.sandbox) $("#nav-sandbox").setAttribute("aria-current", "page");
   window.scrollTo(0, 0);
@@ -489,6 +520,7 @@ function route() {
   const h = decodeURIComponent(location.hash.slice(1));
   if (h === "carnet") return showNotebook();
   if (h === "decouvrir") return showDiscover();
+  if (h === "lexique") return showLexique();
   if (h === "bac-a-sable") return openLevel("bac-a-sable");
   if (h.startsWith("mission-")) { const id = h.slice(8); const i = levelIndex(id); if (i >= 0 && isUnlocked(i)) return openLevel(id); }
   showMap();
@@ -557,6 +589,7 @@ function showMap() {
         <div class="chap-top"><span>Atelier ${c.n}</span><span class="chap-piece ${done.has(c.n) ? "got" : ""}">${done.has(c.n) ? "✓ " : esc(GAME.rewardLabel) + " : "}${esc(c.piece)}</span></div>
         <h3>${esc(c.title)}</h3>
         <div class="chips">${c.notions.map(n => `<code>${esc(n)}</code>`).join("")}</div>
+        ${c.skills ? `<details class="skills"><summary>${done.has(c.n) ? "Ce que tu sais faire" : "Ce que tu vas apprendre"}</summary><ul>${c.skills.map(k => `<li class="${done.has(c.n) ? "got" : ""}">${md(k)}</li>`).join("")}</ul></details>` : ""}
         <ol class="nodes">
           ${LEVELS.map((l, i) => ({ l, i })).filter(o => o.l.ch === c.n).map(({ l, i }) => {
             const p = store.progress[l.id]; const unlocked = isUnlocked(i);
@@ -599,6 +632,16 @@ function showDiscover() {
   <section class="disc-cards">
     ${D.cards.map((c, k) => `<article class="card disc-card"><span class="disc-num">${k + 1}</span><h2>${esc(c.title)}</h2>${(Array.isArray(c.text) ? c.text : [c.text]).map(t => `<p>${md(t)}</p>`).join("")}${c.list ? `<ul>${c.list.map(x => `<li>${md(x)}</li>`).join("")}</ul>` : ""}</article>`).join("")}
   </section>
+
+  ${D.before ? `<section class="disc-block">
+    <div class="card before">
+      <p class="card-kicker">Avant de commencer</p>
+      <h2>${esc(D.before.title || "Ce qu’il faut savoir avant de commencer")}</h2>
+      ${D.before.text ? `<p>${md(D.before.text)}</p>` : ""}
+      <ul>${D.before.items.map(x => `<li>${md(x)}</li>`).join("")}</ul>
+      ${D.before.link ? `<p><a class="btn btn-small" href="${D.before.link.url}">${esc(D.before.link.label)}</a></p>` : ""}
+    </div>
+  </section>` : ""}
 
   <section class="disc-block">
     <div class="section-title"><h2>Une page web, c’est une maison</h2><p>Trois langages, trois rôles. Ils travaillent toujours ensemble.</p></div>
@@ -740,6 +783,7 @@ function lessonHTML(L) {
     <dl class="pieces">${s.pieces.map(([k, d]) => `<div><dt><code>${esc(k)}</code></dt><dd>${md(d)}</dd></div>`).join("")}</dl>
     ${ex ? `<div class="example"><p class="mini-label">Exemple</p><pre class="code-block">${highlight(ex.code, ex.lang)}</pre><p class="mini-label">Résultat</p><div class="browser small"><iframe id="example-frame" title="Résultat de l’exemple" sandbox="allow-same-origin"></iframe></div></div>` : ""}
     ${s.trap ? `<div class="trap"><p class="mini-label">Piège à éviter</p><p>${md(s.trap)}</p></div>` : ""}
+    ${s.good ? `<div class="good"><p class="mini-label">Bonne pratique</p>${(Array.isArray(s.good) ? s.good : [s.good]).map(t => `<p>${md(t)}</p>`).join("")}</div>` : ""}
   </section>`;
 }
 function renderExample(L) {
@@ -757,7 +801,7 @@ function benchHTML(L) {
   let view;
   if (mode === "board") {
     view = `<div class="preview card board-card">
-      <div class="preview-head"><span class="mini-label">${esc(GAME.boardSkin.title)}</span>${L.sandbox ? "" : `<span class="board-status" id="board-status" aria-live="polite"></span>`}</div>
+      <div class="preview-head"><span class="mini-label">${esc(GAME.boardSkin.title)}</span>${L.devices ? `<div class="segs devices" role="group" aria-label="Taille d’écran"><button type="button" class="seg on" data-device="pc">Ordinateur</button><button type="button" class="seg" data-device="phone">Téléphone</button></div>` : ""}${L.sandbox ? "" : `<span class="board-status" id="board-status" aria-live="polite"></span>`}</div>
       <div class="board" style="height:${L.boardHeight || GAME.boardSkin.height || 320}px"><iframe id="frame-target" title="Les cibles" sandbox="allow-same-origin"></iframe><iframe id="frame-game" title="Ton plateau" sandbox="allow-same-origin"></iframe></div>
       ${L.sandbox ? "" : `<p class="board-legend">${md(GAME.boardSkin.legend)}</p>`}
     </div>`;
@@ -765,7 +809,7 @@ function benchHTML(L) {
     view = `<div class="preview card">
       <div class="preview-head">
         ${L.sandbox ? `<span class="mini-label">Ta page</span>` : `<div class="segs" role="tablist" aria-label="Aperçu"><button type="button" class="seg on" data-view="page">Ton résultat</button><button type="button" class="seg" data-view="model">Le modèle à reproduire</button></div>`}
-        <span class="live-dot">en direct</span>
+        ${L.devices ? `<div class="segs devices" role="group" aria-label="Taille d’écran"><button type="button" class="seg on" data-device="pc">Ordinateur</button><button type="button" class="seg" data-device="phone">Téléphone</button></div>` : ""}<span class="live-dot">en direct</span>
       </div>
       <div class="browser"><div class="browser-bar"><i></i><i></i><i></i><span id="page-name">${esc(L.file || (mode === "html" ? "index.html" : "ma-page.html"))}</span></div>
         <iframe id="frame-page" title="Ton résultat" sandbox="allow-same-origin"></iframe>
@@ -992,6 +1036,7 @@ function success(L) {
   $("#dialog").innerHTML = `
     <div class="dialog-top"><div class="dialog-mascot">${mascot("happy")}</div><div><p class="card-kicker">Mission ${i + 1} réussie</p><h2 id="modal-title">${finale ? esc(GAME.finaleTitle) : "Bien joué !"}</h2><div class="big-stars" aria-label="${stars} étoiles sur 3">${starsHTML(stars)}</div></div></div>
     ${newPiece ? `<p class="new-piece">${esc(GAME.rewardMsg)} ${esc(ch.piece)} ! Atelier ${ch.n} terminé.</p>` : ""}
+    ${newPiece && ch.skills ? `<div class="recap"><p class="mini-label">Bilan de l’atelier : ce que tu sais faire maintenant</p><ul>${ch.skills.map(k => `<li>${md(k)}</li>`).join("")}</ul></div>` : ""}
     <div><p class="mini-label">Ce qu’il faut retenir</p><p>${md(L.debrief)}</p></div>
     ${finale && GAME.next ? `<div class="suite-box"><p class="mini-label">La suite</p><p>${md(GAME.next.text)}</p></div>` : ""}
     ${stars < 3 ? `<p style="color:var(--ink-soft);font-size:.92rem">Tu peux rejouer la mission plus tard sans indice pour gagner 3 étoiles.</p>` : ""}
@@ -1022,6 +1067,53 @@ function confetti(n) {
 }
 
 /* =====================================================================
+   VUE : LEXIQUE (vocabulaire, bonnes pratiques, prêt pour la suite ?)
+   ===================================================================== */
+function showLexique() {
+  current = null; preview = null; setHash("lexique");
+  const key = t => t.replace(/[`<>.#:@*!-]/g, "").trim();
+  const words = (GAME.glossary || []).slice().sort((a, b) => key(a[0]).localeCompare(key(b[0]), "fr"));
+  const checks = store.checks || {};
+  const list = GAME.checklist || [];
+  const nOk = list.filter((_, k) => checks[k]).length;
+  const nextName = GAME.next ? GAME.next.name : "la suite";
+  $("#view-lexique").innerHTML = `
+    <div class="section-title"><div><p class="kicker">Le mémo</p><h2>Lexique et bonnes pratiques</h2></div><p>Les mots à connaître, les bons réflexes, et de quoi vérifier que tu es prêt pour la suite.</p></div>
+    <div class="lex-layout">
+      <section class="card lex-words">
+        <div class="lex-head"><p class="card-kicker">Le lexique · ${words.length} mots</p><input type="search" id="lex-search" placeholder="Chercher un mot…" aria-label="Chercher un mot du lexique"></div>
+        <dl class="lexicon" id="lexicon">${words.map(([k, d, ex]) => `<div data-k="${esc((k + " " + d).toLowerCase())}"><dt>${md(k)}</dt><dd><span>${md(d)}</span>${ex ? `<pre class="code-block small">${highlight(ex)}</pre>` : ""}</dd></div>`).join("")}</dl>
+        <p class="lex-empty" id="lex-empty" hidden>Aucun mot trouvé.</p>
+      </section>
+      <div class="lex-side">
+        ${GAME.practices ? `<section class="card"><p class="card-kicker">Les bonnes pratiques</p><ol class="practices">${GAME.practices.map(t => `<li>${md(t)}</li>`).join("")}</ol></section>` : ""}
+        ${list.length ? `<section class="card ready">
+          <p class="card-kicker">Prêt pour ${esc(nextName)} ?</p>
+          <p>Coche ce que tu sais faire <strong>sans regarder la solution</strong>. Si tu hésites, revois la mission indiquée.</p>
+          <ul class="checklist">${list.map((c, k) => {
+            const i = c.mission ? levelIndex(c.mission) : -1;
+            return `<li><label><input type="checkbox" data-check="${k}" ${checks[k] ? "checked" : ""}> <span>${md(c.text)}</span></label>${i >= 0 ? `<button class="btn btn-small btn-ghost" type="button" data-open="${c.mission}" ${isUnlocked(i) ? "" : "disabled"}>Revoir la mission ${i + 1}</button>` : ""}</li>`;
+          }).join("")}</ul>
+          <p class="ready-score"><b>${nOk} / ${list.length}</b> ${nOk === list.length ? `· Bravo, tu as les bases pour passer à la suite !${GAME.next ? ` <a href="${GAME.next.url}">${esc(GAME.next.name)} →</a>` : ""}` : "· Continue, tu y es presque."}</p>
+        </section>` : ""}
+      </div>
+    </div>`;
+  setView("lexique");
+  updateStats();
+  const inp = $("#lex-search");
+  inp.addEventListener("input", () => {
+    const qv = inp.value.trim().toLowerCase(); let n = 0;
+    $$("#lexicon > div").forEach(d => { const on = !qv || d.dataset.k.includes(qv); d.hidden = !on; if (on) n++; });
+    $("#lex-empty").hidden = n > 0;
+  });
+  $$("[data-check]").forEach(c => c.addEventListener("change", () => {
+    store.checks = Object.assign({}, store.checks, { [c.dataset.check]: c.checked });
+    save();
+    const y = window.scrollY; showLexique(); window.scrollTo(0, y);
+  }));
+}
+
+/* =====================================================================
    VUE : CARNET
    ===================================================================== */
 function showNotebook() {
@@ -1031,7 +1123,7 @@ function showNotebook() {
     <div class="section-title"><div><p class="kicker">Antisèche</p><h2>Mon carnet</h2></div><p>Toutes les notions débloquées, à garder sous la main pendant tes projets.</p></div>
     <div class="notebook">${items.map(({ l, i }) => {
       if (!isUnlocked(i)) return `<div class="note locked"><p class="card-kicker">Mission ${i + 1}</p><h3>${esc(l.notion)}</h3><p>À débloquer en jouant.</p></div>`;
-      return `<div class="note"><p class="card-kicker">Mission ${i + 1} · ${esc(l.title)}</p><h3>${esc(l.notion)}</h3><pre class="code-block">${highlight(l.lesson.code, l.lesson.lang)}</pre><dl class="pieces">${l.lesson.pieces.map(([k, d]) => `<div><dt><code>${esc(k)}</code></dt><dd>${md(d)}</dd></div>`).join("")}</dl>${l.lesson.trap ? `<div class="trap"><p class="mini-label">Piège</p><p>${md(l.lesson.trap)}</p></div>` : ""}</div>`;
+      return `<div class="note"><p class="card-kicker">Mission ${i + 1} · ${esc(l.title)}</p><h3>${esc(l.notion)}</h3><pre class="code-block">${highlight(l.lesson.code, l.lesson.lang)}</pre><dl class="pieces">${l.lesson.pieces.map(([k, d]) => `<div><dt><code>${esc(k)}</code></dt><dd>${md(d)}</dd></div>`).join("")}</dl>${l.lesson.trap ? `<div class="trap"><p class="mini-label">Piège</p><p>${md(l.lesson.trap)}</p></div>` : ""}${l.lesson.good ? `<div class="good"><p class="mini-label">Bonne pratique</p>${(Array.isArray(l.lesson.good) ? l.lesson.good : [l.lesson.good]).map(t => `<p>${md(t)}</p>`).join("")}</div>` : ""}</div>`;
     }).join("")}</div>
     <section class="prof">
       <p class="card-kicker">Options</p>
@@ -1054,6 +1146,14 @@ document.addEventListener("click", e => {
   if (t.dataset.go === "map") { showMap(); return; }
   if (t.dataset.go === "discover") { showDiscover(); return; }
   if (t.dataset.tab) { selectTab(t.dataset.tab); return; }
+  if (t.dataset.device) {
+    $$("[data-device]").forEach(b => b.classList.toggle("on", b === t));
+    const phone = t.dataset.device === "phone";
+    const box = $(".workbench .board") || $(".workbench .preview .browser");
+    if (box) box.classList.toggle("phone", phone);
+    setTimeout(() => { fitFrames(); updateBoardStatus(); }, 60);
+    return;
+  }
   if (t.dataset.view) {
     $$("[data-view]").forEach(b => b.classList.toggle("on", b === t));
     const model = t.dataset.view === "model";
@@ -1083,6 +1183,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#nav-map").addEventListener("click", showMap);
   $("#nav-discover").addEventListener("click", showDiscover);
   $("#nav-notebook").addEventListener("click", showNotebook);
+  $("#nav-lexique").addEventListener("click", showLexique);
   $("#nav-sandbox").addEventListener("click", () => openLevel("bac-a-sable"));
   $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#modal").hidden = true; });
   window.addEventListener("resize", () => { fitFrames(); });

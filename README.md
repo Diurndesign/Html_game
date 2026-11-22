@@ -1,40 +1,48 @@
 # La maison de Bip · Html_game
 
-Un jeu pour apprendre les bases du HTML en écrivant du vrai code, pensé pour les personnes qui veulent **commencer une formation dans le web** : aucune connaissance n’est nécessaire.
+Un jeu pour apprendre le HTML en écrivant du vrai code, pensé pour les personnes qui veulent **commencer une formation dans le web** : aucune connaissance n’est nécessaire.
 
 Bip, le petit robot de [Mission Bip](https://diurndesign.github.io/javascript_game/), n’a pas encore de maison. Chaque mission réussie construit sa page web, et chaque atelier terminé ajoute une pièce à sa maison (les fondations, les murs, la fenêtre…). On retrouve Bip à la fin de la série, pour apprendre le JavaScript.
 
 ## Jouer
 
 - **En ligne** : active GitHub Pages (Settings › Pages › *Deploy from a branch*, choisis la branche du jeu et le dossier `/ (root)`). Le jeu sera disponible à l’adresse `https://diurndesign.github.io/Html_game/`.
-- **En local** : ouvre le dossier avec l’extension Live Server de VS Code (ou n’importe quel petit serveur web). Ouvrir `index.html` directement en double-cliquant peut bloquer l’aperçu dans certains navigateurs.
+- **En local** : ouvre le dossier avec l’extension Live Server de VS Code (ou n’importe quel petit serveur web). Ouvrir `index.html` en double-cliquant peut bloquer l’aperçu dans certains navigateurs.
 
-La progression est enregistrée dans le navigateur, et en ligne si l’élève crée un compte (voir « La sauvegarde en ligne »).
+La progression est enregistrée dans le navigateur de chaque joueur (localStorage).
 
 ## Comment ça marche
 
-- **Découvrir** : une page qui explique ce qu’est le HTML, à quoi il sert et pourquoi on l’utilise, avec une démo (le même texte avec et sans balises), l’anatomie d’un élément, des exemples de la vraie vie, le vocabulaire et les pièges du débutant.
-- **Les missions** : la page se construit **en direct** pendant que l’élève tape. Le bouton **Vérifier** (ou Ctrl + Entrée) contrôle chaque objectif.
+- **Découvrir** : une page qui explique ce qu’est le HTML, à quoi ça sert et pourquoi on l’utilise, avec une démo à manipuler, des exemples de la vraie vie, les métiers du web qui s’en servent, le vocabulaire et les pièges du débutant.
+- **Les missions** : la page se construit **en direct** pendant que l’élève tape son HTML, à côté du modèle à reproduire. Le bouton **Vérifier** (ou Ctrl + Entrée) contrôle chaque objectif.
 
 | Onglet | Ce qu’on y voit |
 |---|---|
 | Ton résultat / Le modèle | La page de l’élève, et la page à reproduire |
 | Objectifs | Chaque critère réussi ou raté, avec une explication quand c’est faux |
-| Remarques | Le vérificateur : balises non fermées, mal imbriquées, inconnues, `alt` manquant, attributs mal orthographiés… en français, avec la ligne surlignée dans l’éditeur |
-| Arbre | Le DOM, pour voir quelle balise contient quelle autre |
+| Remarques | Le vérificateur HTML : balises non fermées, mal imbriquées ou inconnues, barre `/` oubliée, `alt` manquant, attributs mal orthographiés… en français, avec la ligne surlignée dans l’éditeur |
+| Arbre | Le DOM : quelle balise contient quelle autre |
+
+Chaque leçon explique **ce que c’est**, **à quoi ça sert**, le **piège à éviter** et la **bonne pratique** professionnelle. Les missions responsive ont une bascule **Ordinateur / Téléphone**.
 
 Étoiles : 3 sans indice, 2 avec un indice, 1 avec la solution.
 
-## Les 14 missions
+## Pour aller jusqu’au bout
 
-| Atelier | Pièce de la maison | Notions |
+- **Lexique** (menu en haut) : 60 mots du vocabulaire professionnel, définis simplement, avec une recherche ; 12 bonnes pratiques ; et la checklist **« Prêt pour la suite ? »** (13 points), qui renvoie vers la mission à revoir pour chaque point.
+- **Ateliers** : chaque atelier annonce ce qu’on va apprendre et se termine par un bilan « Ce que tu sais faire maintenant ».
+- **Découvrir** : la page commence par ce qu’il faut savoir avant de commencer, et renvoie au jeu précédent si besoin.
+
+## Les 24 missions
+
+| Atelier | Récompense | Notions |
 |---|---|---|
-| 1. Les fondations | Les fondations | balises, squelette `<!DOCTYPE>` / `head` / `body`, quiz |
-| 2. Les murs | Les murs | `h1` à `h6`, `p`, `strong`, `em`, `br` |
-| 3. La fenêtre | La fenêtre | `img`, `src`, `alt`, `a`, `href`, `target` |
-| 4. Les étagères | La cheminée | `ul`, `ol`, `li`, listes imbriquées, quiz |
-| 5. La porte | La porte | `form`, `label`, `input`, `textarea`, `required`, `placeholder` |
-| 6. Le toit | Le toit | `header`, `nav`, `main`, `footer`, `section`, mission finale |
+| 1. Les fondations | Les fondations | les balises, `<!DOCTYPE>`, head, body, commentaires, indentation, quiz |
+| 2. Les murs | Les murs | h1 à h6, p, strong, em, br, caractères spéciaux, div, span, class, id |
+| 3. La fenêtre | La fenêtre | `<img>`, src, alt, `<a href>`, chemins relatifs et absolus, ancres, figure, figcaption |
+| 4. Les étagères | La cheminée | `<ul> et <li>`, `<ol>`, listes imbriquées, table, tr, th, td, quiz |
+| 5. La porte | La porte | `<form>`, `<label>`, `<input>`, textarea, required, placeholder, radio, checkbox, select |
+| 6. Le toit | Le toit | header, nav, main, footer, section, article, aside, link, script, meta, quiz, mission finale |
 
 En plus : un **Carnet** (antisèche des notions débloquées) et un **Bac à sable** pour tester librement. Dans le Carnet, l’option « Débloquer toutes les missions » permet au formateur d’ouvrir toutes les missions.
 
@@ -42,16 +50,18 @@ En plus : un **Carnet** (antisèche des notions débloquées) et un **Bac à sab
 
 ```
 index.html   la structure de la page
-style.css    le design commun aux 4 jeux
+jeu.css      le design commun aux 4 jeux
 theme.css    les couleurs de ce jeu (variables CSS dans :root)
-engine.js    le moteur commun : éditeur, aperçu, vérificateur, objectifs, carte, carnet
+engine.js    le moteur commun : éditeur, aperçu, vérificateur, objectifs, carte, carnet, lexique
 cloud.js     la sauvegarde en ligne (Firebase), reprise de Mission Bip
-mascot.js    la maison de Bip, en SVG (elle se construit pièce par pièce)
-game.js      les données du jeu : page Découvrir, ateliers et missions (tableau levels)
+mascot.js    la maison de Bip, qui se construit pièce par pièce, en SVG
+game.js      les données du jeu : page Découvrir, lexique, ateliers et missions (tableau levels)
 img/         les images utilisées dans les missions
+style.css    la feuille de style de la maison de Bip (reliée dans la mission « Brancher la maison »)
+script.js    le fichier JavaScript vide relié dans la même mission
 ```
 
-Pour ajouter ou modifier une mission, édite le tableau `levels` dans `game.js`. Chaque mission contient : le texte de Bip, la leçon (quoi, pourquoi, code, morceaux, exemple, piège), les étapes, le code de départ, les objectifs (`goals`, avec une fonction `test`), les indices et la solution.
+Pour ajouter ou modifier une mission, édite le tableau `levels` dans `game.js`. Chaque mission contient : le texte de Bip, la leçon (quoi, pourquoi, code, morceaux, piège), les étapes, le code de départ, les objectifs (`goals`, avec une fonction `test`), les indices et la solution (qui sert aussi de modèle à reproduire).
 
 ## La sauvegarde en ligne
 
