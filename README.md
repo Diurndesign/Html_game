@@ -99,7 +99,7 @@ L’**Espace formateur** (bouton en bas de page) est celui de Mission Bip : `htt
 | [Mission Kami](https://diurndesign.github.io/Css_game/) | CSS | Kami, le caméléon |
 | [Kami et les lucioles](https://diurndesign.github.io/Flexbox-game/) | CSS Flexbox | Kami |
 | [Le potager de Kami](https://diurndesign.github.io/Grid-game/) | CSS Grid | Kami |
-| [Kami s’adapte](https://diurndesign.github.io/responsive-game/) | Responsive | Kami |
+| [Kami s’adapte](https://diurndesign.github.io/Responsive-game/) | Responsive | Kami |
 | [Mission Bip](https://diurndesign.github.io/javascript_game/) | JavaScript | Bip, le robot |
 
 ---
