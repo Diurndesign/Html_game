@@ -234,7 +234,8 @@ function parseCSS(src) {
         return;
       }
       if (clean[i] === "}") {
-        if (sel) add("error", selLine, `Il manque l’accolade ouvrante \`{\` après \`${sel.split("\n")[0].trim()}\`.`);
+        // un texte suivi de } : soit la { a été oubliée (cette } ferme la règle cassée), soit la } est en trop
+        if (sel) { add("error", selLine, `Il manque l’accolade ouvrante \`{\` après \`${sel.split("\n")[0].trim()}\`.`); i++; continue; }
         if (media) { i++; return; }
         add("error", lineAt(clean, i), "Cette accolade fermante `}` est en trop : aucune règle n’est ouverte ici.");
         i++; continue;
@@ -438,7 +439,8 @@ async function renderPreview(code, first) {
 function fitFrames() {
   // la hauteur de l’aperçu suit le contenu (entre 220 et 560 px)
   ["#frame-page", "#frame-model"].forEach(s => {
-    const f = $(s); if (!f || !f.contentDocument || !f.contentDocument.documentElement) return;
+    const f = $(s); if (!f || f.hidden || !f.contentDocument || !f.contentDocument.documentElement) return;
+    f.style.height = "0px"; // on mesure le contenu, pas la hauteur actuelle de l’iframe
     const h = f.contentDocument.documentElement.scrollHeight;
     f.style.height = Math.max(220, Math.min(560, h + 4)) + "px";
   });
@@ -658,7 +660,7 @@ function showDiscover() {
       const html = v.html != null ? v.html : D.demo.html;
       const css = (D.demo.base || "") + (v.css || "");
       loadFrame($("#demo-frame"), `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">${v.raw ? "" : `<style>${PAGE_BASE}${killStyleEnd(css)}</style>`}</head><body>${html}</body></html>`).then(doc => {
-        const f = $("#demo-frame"); if (f && doc) f.style.height = Math.max(200, Math.min(460, doc.documentElement.scrollHeight + 4)) + "px";
+        const f = $("#demo-frame"); if (f && doc) { f.style.height = "0px"; f.style.height = Math.max(140, Math.min(460, doc.documentElement.scrollHeight + 4)) + "px"; }
       });
     };
     $$("[data-demo]").forEach(b => b.addEventListener("click", () => show(+b.dataset.demo)));
@@ -742,7 +744,7 @@ function renderExample(L) {
   let doc;
   if ((ex.lang || GAME.lang) === "html") doc = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>${PAGE_BASE}body{margin:12px}${ex.css || ""}</style></head><body>${ex.code}</body></html>`;
   else doc = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>${PAGE_BASE}body{margin:12px}${ex.base || ""}${killStyleEnd(ex.code)}</style></head><body>${ex.html || ""}</body></html>`;
-  loadFrame(f, doc).then(d => { if (d) f.style.height = Math.max(60, Math.min(320, d.documentElement.scrollHeight + 2)) + "px"; });
+  loadFrame(f, doc).then(d => { if (d) { f.style.height = "0px"; f.style.height = Math.max(60, Math.min(320, d.documentElement.scrollHeight + 2)) + "px"; } });
 }
 
 function benchHTML(L) {
