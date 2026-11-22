@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 232" width="200" height="232"><style>.head{fill:#FFC93C;stroke:#1B2440;stroke-width:4}.neck{fill:#9AA5BD;stroke:#1B2440;stroke-width:4}.body{fill:#CBD3E1;stroke:#1B2440;stroke-width:4}.body.painted{fill:#3D7BF7}.part rect,.part circle{fill:#9AA5BD;stroke:#1B2440;stroke-width:4}.part line{stroke:#1B2440}.part .tip{fill:#FF6B4A}.wheels circle{fill:#1B2440}.wheels .hub{fill:#FFC93C;stroke:none}.screen rect{fill:#1B2440}.screen text{fill:#8FE3A8;font:700 15px monospace}.eye{fill:#1B2440}.glint{fill:#fff}.lid,.mouth{stroke:#1B2440;stroke-width:5;stroke-linecap:round;fill:none}.mouth{stroke-width:4}.cheek{fill:#FF8A70;opacity:.75}.heart{fill:#FF6B4A;stroke:#1B2440;stroke-width:2}</style>
+    <g class="part "><line x1="100" y1="42" x2="100" y2="18" stroke-width="5" stroke-linecap="round"/><circle class="tip" cx="100" cy="14" r="8"/></g>
+    <g class="part "><rect x="34" y="142" width="22" height="50" rx="11"/><rect x="144" y="142" width="22" height="50" rx="11"/></g>
+    <g class="part wheels"><circle cx="76" cy="212" r="15"/><circle cx="124" cy="212" r="15"/><circle class="hub" cx="76" cy="212" r="5"/><circle class="hub" cx="124" cy="212" r="5"/></g>
+    <rect class="neck" x="88" y="124" width="24" height="14"/>
+    <rect class="body painted" x="58" y="134" width="84" height="66" rx="16"/>
+    <g class="part screen"><rect x="74" y="146" width="52" height="30" rx="7"/><text x="100" y="166" text-anchor="middle">&lt;/&gt;</text></g>
+    <path class="heart" d="M100 194 c-7 -5 -11 -8 -11 -12 a5.5 5.5 0 0 1 11 -2 a5.5 5.5 0 0 1 11 2 c0 4 -4 7 -11 12z"/>
+    <rect class="head" x="36" y="40" width="128" height="88" rx="30"/>
+    <circle class="eye" cx="78" cy="82" r="11"/><circle class="glint" cx="82" cy="78" r="3.5"/><circle class="eye" cx="122" cy="82" r="11"/><circle class="glint" cx="126" cy="78" r="3.5"/><path class="mouth" d="M88 104 q12 9 24 0"/>
+    <ellipse class="cheek" cx="58" cy="100" rx="8" ry="5"/><ellipse class="cheek" cx="142" cy="100" rx="8" ry="5"/>
+  </svg>

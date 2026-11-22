@@ -88,6 +88,21 @@ main { padding: clamp(16px, 3vw, 32px); max-width: 1360px; margin: 0 auto; }
 .tago .part.got .door { fill: #9B5DE5; }
 .tago .part.got .knob { fill: var(--ink); }
 .tago .part.ghost * { fill: none; stroke: #8D97AE; stroke-width: 2.5; stroke-dasharray: 6 5; }
+/* La maison de Bip (jeu HTML) */
+.maison .part.got rect, .maison .part.got path { stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.maison .part.got rect { fill: #FFF4E0; }
+.maison .part.got .roof { fill: #3D7BF7; }
+.maison .part.got .win { fill: #8FD3FF; }
+.maison .part.got .bars { fill: none; stroke-width: 3; }
+.maison .part.got .door { fill: #FF8A3D; }
+.maison .part.got .knob { fill: var(--ink); stroke: none; }
+.maison .part.ghost * { fill: none; stroke: #8D97AE; stroke-width: 2.5; stroke-dasharray: 6 5; }
+.maison .smoke circle { fill: #fff; stroke: #B9C2D6; stroke-width: 2; }
+.maison .sparkle path { fill: #FFC93C; stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; }
+@media (prefers-reduced-motion: no-preference) {
+  .maison .smoke { animation: smoke 3s ease-in-out infinite; transform-origin: 108px 22px; }
+}
+@keyframes smoke { 0%, 100% { opacity: .9; transform: translateY(0); } 50% { opacity: .5; transform: translateY(-4px); } }
 /* Kami, le caméléon du CSS */
 .kami .branch { fill: none; stroke: #8B5E34; stroke-width: 8; stroke-linecap: round; }
 .kami .twig { fill: none; stroke: #8B5E34; stroke-width: 4; stroke-linecap: round; }

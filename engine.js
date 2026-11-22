@@ -1,7 +1,7 @@
 /* =====================================================================
    MOTEUR COMMUN des jeux HTML · CSS · Flexbox · Grid
    Les données du jeu (ateliers, missions, page Découvrir) sont dans game.js.
-   La mascotte (Tago ou Kami) est dans mascot.js.
+   La mascotte (la maison de Bip ou Kami) est dans mascot.js.
    ===================================================================== */
 "use strict";
 
@@ -997,7 +997,7 @@ function success(L) {
     ${stars < 3 ? `<p style="color:var(--ink-soft);font-size:.92rem">Tu peux rejouer la mission plus tard sans indice pour gagner 3 étoiles.</p>` : ""}
     <div class="dialog-actions">
       <button class="btn btn-ghost" type="button" id="modal-stay">Rester ici</button>
-      ${finale && GAME.next ? `<a class="btn btn-primary" href="${GAME.next.url}">${esc(GAME.next.name)} →</a>` : next && !allDone ? `<button class="btn btn-primary" type="button" id="modal-next">Mission suivante →</button>` : `<button class="btn btn-primary" type="button" id="modal-map">Voir ${esc(MASCOT.name)} sur la carte</button>`}
+      ${finale && GAME.next ? `<a class="btn btn-primary" href="${GAME.next.url}">${esc(GAME.next.name)} →</a>` : next && !allDone ? `<button class="btn btn-primary" type="button" id="modal-next">Mission suivante →</button>` : `<button class="btn btn-primary" type="button" id="modal-map">${esc(MASCOT.see || "Voir " + MASCOT.name + " sur la carte")}</button>`}
     </div>`;
   $("#modal").hidden = false;
   const close = () => { $("#modal").hidden = true; };

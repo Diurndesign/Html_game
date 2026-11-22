@@ -2,7 +2,7 @@
 /* =====================================================================
    SAUVEGARDE EN LIGNE (Firebase) : un compte e-mail + mot de passe,
    la progression suit l'élève sur n'importe quel ordinateur.
-   Le même compte sert pour tous les jeux : Mission Tago (HTML), Mission Kami (CSS),
+   Le même compte sert pour tous les jeux : La maison de Bip (HTML), Mission Kami (CSS),
    Kami et les lucioles (Flexbox), Le potager de Kami (Grid), Mission Bip et Bip Agence.
    Repris de Mission Bip (javascript_game/cloud.js), même projet Firebase « bip-jeux ».
    Sans compte, le jeu marche comme avant (sauvegarde dans le navigateur).
@@ -145,8 +145,8 @@ const BipCloud = (() => { // même nom que dans Mission Bip
   }
   const close = () => { $("#modal").hidden = true; };
   const REMINDER = `<p class="cloud-remind"><b>Important</b> Note ton e-mail et ton mot de passe quelque part (carnet, téléphone). Ce sont eux qui te permettent de retrouver ta progression sur un autre ordinateur.</p>`;
-  const other = () => "les autres jeux (Mission Tago, Mission Kami, Mission Bip…)";
-  const ONE = () => `<p class="cloud-one"><b>Un seul compte pour tous les jeux</b> Mission Tago (HTML), Mission Kami (CSS), Flexbox, Grid et Mission Bip (JavaScript) utilisent le même compte. Si tu en as déjà créé un dans l’un d’eux, ne recrée rien : connecte-toi avec le même e-mail et le même mot de passe.</p>`;
+  const other = () => "les autres jeux (La maison de Bip, Mission Kami, Mission Bip…)";
+  const ONE = () => `<p class="cloud-one"><b>Un seul compte pour tous les jeux</b> La maison de Bip (HTML), Mission Kami (CSS), Flexbox, Grid et Mission Bip (JavaScript) utilisent le même compte. Si tu en as déjà créé un dans l’un d’eux, ne recrée rien : connecte-toi avec le même e-mail et le même mot de passe.</p>`;
   const head = (t, sub) => `<p class="card-kicker">Ma sauvegarde en ligne</p><h2 id="modal-title">${t}</h2>${sub ? `<p>${sub}</p>` : ""}`;
   const field = (id, label, type, extra = "") => `<label class="cloud-field" for="${id}"><span>${label}</span><input id="${id}" type="${type}" ${extra}></label>`;
 
