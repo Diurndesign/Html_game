@@ -520,3 +520,14 @@ a.trio-item[href]:hover { border-color: var(--ink); }
 /* Pied de page : la série de jeux et le site Atelier */
 .pied-jeu-in .serie a[aria-current] { text-decoration: none; background: var(--mascot); color: var(--mascot-ink, var(--ink)); border-radius: 6px; padding: 0 6px; }
 .pied-jeu-in .serie .atelier { border-left: 2px solid var(--ink-soft); padding-left: 14px; }
+
+/* Jeu responsive : bascule à 3 écrans */
+.screens .seg { padding: 3px 10px; font-size: .85rem; }
+.screens .seg small { font-weight: 400; opacity: .75; margin-left: 2px; }
+
+/* Kami et les écrans (jeu responsive) */
+.kami .dev.got rect, .kami .dev.got path { stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.kami .dev.got rect { fill: #9BE3FF; }
+.kami .dev.got .dk { fill: var(--ink); }
+.kami .dev.got path.dk { fill: var(--ink); }
+.kami .dev.ghost * { fill: none; stroke: #8D97AE; stroke-width: 2; stroke-dasharray: 4 3; }

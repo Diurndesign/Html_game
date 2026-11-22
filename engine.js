@@ -370,6 +370,16 @@ const isColorSet = (c, sel, prop, def) => { const v = cs(c, sel, prop); return v
 const px = v => parseFloat(v) || 0;
 const hasCode = (c, re) => re.test(c.clean);
 const noErrors = c => !c.issues.some(x => x.level === "error") || `Le vérificateur trouve encore ${c.issues.filter(x => x.level === "error").length} erreur(s) : regarde l’onglet **Remarques**.`;
+/* Jeu responsive : la page de l’élève est rendue à chaque largeur de GAME.screens.
+   qAt(c, "mobile", sel), csAt(c, "tablette", sel, prop), boxAt(c, "ordi", sel) → {left, top, width, height},
+   visibleAt(c, "mobile", sel) → l’élément est-il affiché à cette largeur ? */
+const docAt = (c, id) => (c.at && c.at[id]) || null;
+const qAt = (c, id, sel) => { const d = docAt(c, id); return d ? d.querySelector(sel) : null; };
+const qaAt = (c, id, sel) => { const d = docAt(c, id); return d ? Array.from(d.querySelectorAll(sel)) : []; };
+const csAt = (c, id, sel, prop) => { const d = docAt(c, id); const e = d && (typeof sel === "string" ? d.querySelector(sel) : sel); return e ? d.defaultView.getComputedStyle(e).getPropertyValue(prop).trim() : ""; };
+const boxAt = (c, id, sel) => { const e = typeof sel === "string" ? qAt(c, id, sel) : sel; if (!e) return null; const r = e.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, right: r.right, bottom: r.bottom }; };
+const visibleAt = (c, id, sel) => { const e = qAt(c, id, sel); if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && csAt(c, id, e, "visibility") !== "hidden"; };
+const overflowAt = (c, id) => { const d = docAt(c, id); return d ? d.documentElement.scrollWidth > d.documentElement.clientWidth + 1 : false; };
 const boardOK = c => c.board ? (c.board.ok || `${c.board.placed} / ${c.board.total} à la bonne place pour l’instant.`) : false;
 
 /* =====================================================================
@@ -383,7 +393,8 @@ function pageDoc(L, code) {
   // les <script> de l’élève restent dans la page (les tests les voient) mais ne s’exécutent pas dans l’aperçu
   if (mode === "html") return code.replace(/<script\b(?![^>]*\btype\s*=)/gi, '<script type="text/plain"');
   const html = L.html != null ? L.html : (GAME.pageHTML || "");
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>${PAGE_BASE}${L.base || ""}</style><style id="user-css">${killStyleEnd(code)}</style></head><body>${html}</body></html>`;
+  // GAME.pageBase remplace le style de base (le jeu responsive veut des images qui débordent au départ)
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>${GAME.pageBase != null ? GAME.pageBase : PAGE_BASE}${L.base || ""}</style><style id="user-css">${killStyleEnd(code)}</style></head><body>${html}</body></html>`;
 }
 function boardDoc(L, css, kind) {
   const b = L.board || GAME.board;
@@ -468,7 +479,22 @@ function fitDevices() {
     else Object.assign(f.style, { width: "", transform: "", marginBottom: "" });
   });
 }
+/* jeu responsive : l’iframe a la vraie largeur de l’écran choisi, puis elle est réduite pour tenir */
+function fitScreens() {
+  if (!current || !session) return;
+  const sc0 = GAME.screens.find(x => x.id === session.screen) || GAME.screens[GAME.screens.length - 1];
+  ["#frame-page", "#frame-model"].forEach(sel => {
+    const f = $(sel); if (!f || f.hidden || !f.contentDocument || !f.contentDocument.documentElement) return;
+    const pw = f.parentElement.clientWidth || sc0.w;
+    Object.assign(f.style, { width: sc0.w + "px", transform: "", marginLeft: "", marginBottom: "", height: "0px" });
+    const h = Math.max(240, Math.min(1600, f.contentDocument.documentElement.scrollHeight + 4));
+    const sc = Math.min(1, pw / sc0.w);
+    Object.assign(f.style, { height: h + "px", transformOrigin: "0 0", transform: sc < 1 ? `scale(${sc})` : "", marginLeft: sc < 1 ? "0" : Math.max(0, (pw - sc0.w) / 2) + "px", marginBottom: sc < 1 ? (-(h - h * sc)) + "px" : "" });
+  });
+  const pn = $("#page-name"); if (pn) pn.textContent = pn.textContent.split(" · ")[0] + " · " + sc0.label;
+}
 function fitFrames() {
+  if (GAME.screens) return fitScreens();
   // la hauteur de l’aperçu suit le contenu (entre 220 et 560 px)
   ["#frame-page", "#frame-model"].forEach(s => {
     const f = $(s); if (!f || f.hidden || !f.contentDocument || !f.contentDocument.documentElement) return;
@@ -721,7 +747,7 @@ function openLevel(id) {
   const L = id === "bac-a-sable" ? GAME.sandbox : LEVELS.find(l => l.id === id);
   if (!L) return showMap();
   current = L; preview = null;
-  session = { hints: 0, solution: false, attempts: 0, answers: {}, errLine: null };
+  session = { hints: 0, solution: false, attempts: 0, answers: {}, errLine: null, screen: GAME.screens ? (GAME.screenDefault || GAME.screens[GAME.screens.length - 1].id) : null };
   if (!L.sandbox) trk("open", L.id);
   setHash(L.sandbox ? "bac-a-sable" : "mission-" + L.id);
   const i = levelIndex(L.id);
@@ -809,7 +835,7 @@ function benchHTML(L) {
     view = `<div class="preview card">
       <div class="preview-head">
         ${L.sandbox ? `<span class="mini-label">Ta page</span>` : `<div class="segs" role="tablist" aria-label="Aperçu"><button type="button" class="seg on" data-view="page">Ton résultat</button><button type="button" class="seg" data-view="model">Le modèle à reproduire</button></div>`}
-        ${L.devices ? `<div class="segs devices" role="group" aria-label="Taille d’écran"><button type="button" class="seg on" data-device="pc">Ordinateur</button><button type="button" class="seg" data-device="phone">Téléphone</button></div>` : ""}<span class="live-dot">en direct</span>
+        ${L.devices ? `<div class="segs devices" role="group" aria-label="Taille d’écran"><button type="button" class="seg on" data-device="pc">Ordinateur</button><button type="button" class="seg" data-device="phone">Téléphone</button></div>` : ""}${GAME.screens ? `<div class="segs screens" role="group" aria-label="Taille d’écran">${GAME.screens.map(x => `<button type="button" class="seg ${x.id === (session.screen || GAME.screens[GAME.screens.length - 1].id) ? "on" : ""}" data-screen="${x.id}">${esc(x.label)} <small>${x.w}px</small></button>`).join("")}</div>` : ""}<span class="live-dot">en direct</span>
       </div>
       <div class="browser"><div class="browser-bar"><i></i><i></i><i></i><span id="page-name">${esc(L.file || (mode === "html" ? "index.html" : "ma-page.html"))}</span></div>
         <iframe id="frame-page" title="Ton résultat" sandbox="allow-same-origin"></iframe>
@@ -938,8 +964,25 @@ async function runCode() {
   if (mode === "board") await wait(Math.max(0, 430 - (performance.now() - preview.lastUpdate)));
   const issues = lint(code);
   const c = { code, clean: stripComments(code, L.lang || GAME.lang), doc: preview && preview.doc, issues, rules: session.rules || [], L };
+  let hidden = null;
+  if (GAME.screens) {
+    hidden = document.createElement("div");
+    hidden.setAttribute("aria-hidden", "true");
+    hidden.style.cssText = "position:absolute;left:-30000px;top:0;visibility:hidden;pointer-events:none";
+    document.body.appendChild(hidden);
+    c.at = {};
+    await Promise.all(GAME.screens.map(async x => {
+      const f = document.createElement("iframe");
+      f.setAttribute("sandbox", "allow-same-origin");
+      f.style.cssText = `width:${x.w}px;height:900px;border:0`;
+      hidden.appendChild(f);
+      c.at[x.id] = await loadFrame(f, pageDoc(L, code));
+    }));
+    await wait(60);
+  }
   if (mode === "board") { c.board = measureBoard(); updateBoardStatus(); }
   const results = L.goals.map(g => { let r; try { r = g.test(c); } catch (e) { console.warn(e); r = false; } return { ok: r === true, detail: typeof r === "string" ? r : null }; });
+  if (hidden) hidden.remove();
   $("#run").disabled = false;
   renderGoals(results);
   const all = results.every(r => r.ok);
@@ -1146,6 +1189,12 @@ document.addEventListener("click", e => {
   if (t.dataset.go === "map") { showMap(); return; }
   if (t.dataset.go === "discover") { showDiscover(); return; }
   if (t.dataset.tab) { selectTab(t.dataset.tab); return; }
+  if (t.dataset.screen) {
+    $$("[data-screen]").forEach(b => b.classList.toggle("on", b === t));
+    session.screen = t.dataset.screen;
+    fitFrames();
+    return;
+  }
   if (t.dataset.device) {
     $$("[data-device]").forEach(b => b.classList.toggle("on", b === t));
     const phone = t.dataset.device === "phone";

@@ -3,7 +3,8 @@
    SAUVEGARDE EN LIGNE (Firebase) : un compte e-mail + mot de passe,
    la progression suit l'élève sur n'importe quel ordinateur.
    Le même compte sert pour tous les jeux : La maison de Bip (HTML), Mission Kami (CSS),
-   Kami et les lucioles (Flexbox), Le potager de Kami (Grid), Mission Bip et Bip Agence.
+   Kami et les lucioles (Flexbox), Le potager de Kami (Grid), Kami s’adapte (Responsive),
+   Mission Bip et Bip Agence.
    Repris de Mission Bip (javascript_game/cloud.js), même projet Firebase « bip-jeux ».
    Sans compte, le jeu marche comme avant (sauvegarde dans le navigateur).
    ===================================================================== */
@@ -146,7 +147,7 @@ const BipCloud = (() => { // même nom que dans Mission Bip
   const close = () => { $("#modal").hidden = true; };
   const REMINDER = `<p class="cloud-remind"><b>Important</b> Note ton e-mail et ton mot de passe quelque part (carnet, téléphone). Ce sont eux qui te permettent de retrouver ta progression sur un autre ordinateur.</p>`;
   const other = () => "les autres jeux (La maison de Bip, Mission Kami, Mission Bip…)";
-  const ONE = () => `<p class="cloud-one"><b>Un seul compte pour tous les jeux</b> La maison de Bip (HTML), Mission Kami (CSS), Flexbox, Grid et Mission Bip (JavaScript) utilisent le même compte. Si tu en as déjà créé un dans l’un d’eux, ne recrée rien : connecte-toi avec le même e-mail et le même mot de passe.</p>`;
+  const ONE = () => `<p class="cloud-one"><b>Un seul compte pour tous les jeux</b> La maison de Bip (HTML), Mission Kami (CSS), Flexbox, Grid, Responsive et Mission Bip (JavaScript) utilisent le même compte. Si tu en as déjà créé un dans l’un d’eux, ne recrée rien : connecte-toi avec le même e-mail et le même mot de passe.</p>`;
   const head = (t, sub) => `<p class="card-kicker">Ma sauvegarde en ligne</p><h2 id="modal-title">${t}</h2>${sub ? `<p>${sub}</p>` : ""}`;
   const field = (id, label, type, extra = "") => `<label class="cloud-field" for="${id}"><span>${label}</span><input id="${id}" type="${type}" ${extra}></label>`;
 
@@ -175,7 +176,7 @@ const BipCloud = (() => { // même nom que dans Mission Bip
     });
   }
   function showLogin(prefill = "") {
-    open(`${head("Me connecter", "Retrouve ta progression avec l’e-mail et le mot de passe de ton compte. C’est le même compte pour tous les jeux (HTML, CSS, Flexbox, Grid, JavaScript).")}
+    open(`${head("Me connecter", "Retrouve ta progression avec l’e-mail et le mot de passe de ton compte. C’est le même compte pour tous les jeux (HTML, CSS, Flexbox, Grid, Responsive, JavaScript).")}
       <form id="cloud-form" class="cloud-form" novalidate>
         ${field("cloud-email", "Ton e-mail", "email", `autocomplete="email" value="${esc(prefill)}" required`)}
         ${field("cloud-pass", "Ton mot de passe", "password", `autocomplete="current-password" required`)}
@@ -261,7 +262,7 @@ const BipCloud = (() => { // même nom que dans Mission Bip
   function bannerHTML() {
     if (!auth) return "";
     if (user) return "";
-    return `<section class="cloud-banner"><div><p class="kicker">Sauvegarde en ligne</p><h2>Crée ton compte pour ne rien perdre</h2><p>Sans compte, ta progression reste dans ce navigateur : sur un autre ordinateur, tu repars de zéro. Avec ton <b>e-mail</b> et un <b>mot de passe</b>, tu la retrouves partout.</p><p class="cloud-banner-one">Déjà un compte dans un autre jeu de la série (HTML, CSS, Flexbox, Grid ou Mission Bip) ? C’est le même : clique sur « J’ai déjà un compte ».</p></div>
+    return `<section class="cloud-banner"><div><p class="kicker">Sauvegarde en ligne</p><h2>Crée ton compte pour ne rien perdre</h2><p>Sans compte, ta progression reste dans ce navigateur : sur un autre ordinateur, tu repars de zéro. Avec ton <b>e-mail</b> et un <b>mot de passe</b>, tu la retrouves partout.</p><p class="cloud-banner-one">Déjà un compte dans un autre jeu de la série (HTML, CSS, Flexbox, Grid, Responsive ou Mission Bip) ? C’est le même : clique sur « J’ai déjà un compte ».</p></div>
       <div class="cloud-banner-actions"><button class="btn btn-primary" type="button" data-cloud="signup">Créer mon compte</button><button class="btn" type="button" data-cloud="login">J’ai déjà un compte</button></div></section>`;
   }
 

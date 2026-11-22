@@ -65,7 +65,7 @@ Pour ajouter ou modifier une mission, édite le tableau `levels` dans `game.js`.
 
 ## La sauvegarde en ligne
 
-Comme dans Mission Bip : sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans Firebase (projet « bip-jeux », le même que Mission Bip) et l’élève la retrouve sur n’importe quel ordinateur. **Le même compte sert pour tous les jeux** : La maison de Bip, Mission Kami, Kami et les lucioles, Le potager de Kami, Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
+Comme dans Mission Bip : sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans Firebase (projet « bip-jeux », le même que Mission Bip) et l’élève la retrouve sur n’importe quel ordinateur. **Le même compte sert pour tous les jeux** : La maison de Bip, Mission Kami, Kami et les lucioles, Le potager de Kami, Kami s’adapte, Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
 
 Ce qui est enregistré pour le formateur, mission par mission : essais, essais ratés, erreurs du vérificateur, indices, solution vue, réponses fausses aux quiz, étoiles et temps passé (même format que Mission Bip).
 
@@ -76,7 +76,7 @@ Rappel aux élèves : noter son e-mail et son mot de passe, et se déconnecter e
 Les règles Firestore du projet « bip-jeux » n’autorisent pour l’instant que `mission-bip` et `bip-agence`. Dans **console.firebase.google.com › bip-jeux › Firestore Database › Règles**, remplace la liste des jeux par :
 
 ```
-&& jeu in ['mission-bip', 'bip-agence', 'maison-bip', 'mission-kami', 'kami-lucioles', 'kami-potager'];
+&& jeu in ['mission-bip', 'bip-agence', 'maison-bip', 'mission-kami', 'kami-lucioles', 'kami-potager', 'kami-ecrans'];
 ```
 
 puis clique sur **Publier**. Sans cette étape, le jeu marche quand même, mais la sauvegarde en ligne affiche « La base refuse l’accès ».
@@ -87,6 +87,7 @@ puis clique sur **Publier**. Sans cette étape, le jeu marche quand même, mais 
 | Mission Kami (CSS) | `eleves/{uid}/jeux/mission-kami` |
 | Kami et les lucioles (Flexbox) | `eleves/{uid}/jeux/kami-lucioles` |
 | Le potager de Kami (Grid) | `eleves/{uid}/jeux/kami-potager` |
+| Kami s’adapte (Responsive) | `eleves/{uid}/jeux/kami-ecrans` |
 
 L’**Espace formateur** (bouton en bas de page) est celui de Mission Bip : `https://diurndesign.github.io/javascript_game/admin.html`.
 
@@ -98,6 +99,7 @@ L’**Espace formateur** (bouton en bas de page) est celui de Mission Bip : `htt
 | [Mission Kami](https://diurndesign.github.io/Css_game/) | CSS | Kami, le caméléon |
 | [Kami et les lucioles](https://diurndesign.github.io/Flexbox-game/) | CSS Flexbox | Kami |
 | [Le potager de Kami](https://diurndesign.github.io/Grid-game/) | CSS Grid | Kami |
+| [Kami s’adapte](https://diurndesign.github.io/responsive-game/) | Responsive | Kami |
 | [Mission Bip](https://diurndesign.github.io/javascript_game/) | JavaScript | Bip, le robot |
 
 ---
