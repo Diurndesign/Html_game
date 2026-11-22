@@ -1133,7 +1133,7 @@ function showNotebook() {
     </section>`;
   setView("notebook");
   $("#unlock-all").addEventListener("change", e => { store.unlockAll = e.target.checked; save(); showNotebook(); });
-  $("#reset-all").addEventListener("click", e => twoStep(e.currentTarget, "Sûr ? Clique encore", () => { store = { progress: {}, drafts: {}, unlockAll: false, seenDiscover: false }; save(); updateStats(); showNotebook(); }));
+  $("#reset-all").addEventListener("click", e => twoStep(e.currentTarget, "Sûr ? Clique encore", () => { store = { progress: {}, drafts: {}, unlockAll: false, seenDiscover: false, owner: store.owner }; if (!store.owner) delete store.owner; save(); updateStats(); showNotebook(); }));
   updateStats();
 }
 
